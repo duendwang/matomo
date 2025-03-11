@@ -1,0 +1,54 @@
+services:
+  mariadb:
+    image: docker.io/bitnami/mariadb:10.6
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD:-no}
+      - MARIADB_USER=${MARIADB_USER:-bn_matomo}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:-M4tom0}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-bitnami_matomo}
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD:?Missing MARIADB_ROOT_PASSWORD}
+      # Flag necessary for the database max allowed packet check
+      # https://matomo.org/faq/troubleshooting/faq_183/
+      - MARIADB_EXTRA_FLAGS=--max_allowed_packet=64MB
+    volumes:
+      #- "./data/mariadb:/bitnami/mariadb"
+      - "matomo_mariadb_data:/bitnami/mariadb"
+    networks:
+      - default
+  matomo:
+    image: docker.io/bitnami/matomo:4
+    expose:
+      - 8080
+      - 8443
+    environment:
+      - MATOMO_DATABASE_HOST=mariadb
+      - MATOMO_DATABASE_PORT_NUMBER=3306
+      - MATOMO_DATABASE_USER=${MARIADB_USER:-bn_matomo}
+      - MATOMO_DATABASE_PASSWORD=${MARIADB_PASSWORD:-M4tom0}
+      - MATOMO_DATABASE_NAME=${MARIADB_DATABASE:-bitnami_matomo}
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD:-no}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kuma.entrypoints=websecure"
+      - "traefik.http.routers.kuma.rule=Host(`{$DOMAIN:?Missing DOMAIN}`)"
+      - "traefik.http.routers.kuma.tls.certresolver=http-challenge"
+    volumes:
+      #- "./data/matomo:/bitnami/matomo"
+      - "matomo_data:/bitnami/matomo"
+    networks:
+      - default
+      - traefik-proxy
+    depends_on:
+      - mariadb
+networks:
+  default:
+  traefik-proxy:
+    name: traefik-proxy
+    external: true
+volumes:
+  matomo_mariadb_data:
+    driver: local
+  matomo_data:
+    driver: local
