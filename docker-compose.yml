@@ -31,9 +31,9 @@ services:
       - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD:-no}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.kuma.entrypoints=websecure"
-      - "traefik.http.routers.kuma.rule=Host(`{$DOMAIN:?Missing DOMAIN}`)"
-      - "traefik.http.routers.kuma.tls.certresolver=http-challenge"
+      - "traefik.http.routers.matomo.entrypoints=websecure"
+      - "traefik.http.routers.matomo.rule=Host(`{$DOMAIN:?Missing DOMAIN}`)"
+      - "traefik.http.routers.matomo.tls.certresolver=http-challenge"
     volumes:
       #- "./data/matomo:/bitnami/matomo"
       - "matomo_data:/bitnami/matomo"
