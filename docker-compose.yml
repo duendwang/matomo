@@ -1,6 +1,12 @@
 services:
   mariadb:
     image: docker.io/bitnami/mariadb:10.6
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     environment:
       # ALLOW_EMPTY_PASSWORD is recommended only for development.
       - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD:-no}
@@ -21,6 +27,12 @@ services:
     expose:
       - 8080
       - 8443
+    user: ${PUID:-1000}:${PGID:-1000}
+    security_opt:
+      - "no-new-privileges:true"
+    cap-drop:
+      - SETUID
+      - SETGID
     environment:
       - MATOMO_DATABASE_HOST=mariadb
       - MATOMO_DATABASE_PORT_NUMBER=3306
